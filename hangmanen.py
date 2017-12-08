@@ -82,13 +82,13 @@ class Hangmanen():
         """Prompts the user to choose what to guess."""
         
         while True:
-            print("Choose one: \n",
-                  "1. Guess a word. \n",
-                  "2. Guess a leter. \n")
+            print(" 1. Guess a word or a letter. \n",
+                   "2. Exit. \n")
             
-            choice = int(input())
+            choice = input("Choose one: ")
+            choice = int(choice)
             
-            if choice != 1 or choice != 2:
+            if choice != 1 and choice != 2:
                 print("Error, insert a valid number.")
 
             else:
@@ -188,13 +188,24 @@ class Hangmanen():
             
             # New line after each song
             print()
+        
+        # New line at the end
+        print()
     
 
 # Testing
 drunk = Hangmanen()
 drunk.loadNames()
 drunk.createBlankNames()
-print(drunk.checkComplete())
-#drunk.askWordOrLetter()
-drunk.replaceInList("a")
-drunk.printBlankList()
+
+while drunk.checkComplete() == False:
+    
+    choice = drunk.askWordOrLetter()
+    
+    if choice == 2:
+        break
+    
+    else:
+        guess = input("Enter a word or letter to guess: ")
+        drunk.replaceInList(guess)
+        drunk.printBlankList()
