@@ -29,11 +29,7 @@ class Hangmanen():
                 # Separates artist and song name
                 self.names.append(line)
                 
-        print(self.names) # Just for testing
-        #for i in self.names:
-            #print(i)
-    
-    
+
     def createBlankNames(self):
         
         """Based on the names loaded, creates the blanks for the player to
@@ -207,5 +203,6 @@ while drunk.checkComplete() == False:
     
     else:
         guess = input("Enter a word or letter to guess: ")
-        drunk.replaceInList(guess)
+        drunk.replaceInList(guess.upper())
+        drunk.replaceInList(guess.lower())
         drunk.printBlankList()
