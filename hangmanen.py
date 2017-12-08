@@ -7,6 +7,7 @@ class Hangmanen():
         self.names = []
         self.blank_names = []
         self.guessedLetters = []
+        self.players = dict()
     
     
     def askForNames(self):
@@ -27,13 +28,28 @@ class Hangmanen():
         
         with open(self.list_name, "r", encoding='utf-8') as file:
             
+            # Just something to keep track of players, useful later
+            i = 0
+            
             for line in file:
+                
                 # Delete any extra space at the end
                 line = line.strip()
-                line = line.split(" - ", maxsplit = 1)
+                
+                # Separate player name and song in a temporary list
+                temp = line.split(": ", maxsplit = 1)
+                
+                # Save player name in the dict
+                self.players[i] = temp[0]
+                
+                # Save the song in the list
+                line = temp[1].split(" - ", maxsplit = 1)
 
                 # Separates artist and song name
                 self.names.append(line)
+                
+                # Next player
+                i += 1
 
 
     def createBlankNames(self):
@@ -173,16 +189,27 @@ class Hangmanen():
         return noHangman
     
     
-    def printBlankList(self):
+    def printBlankList(self, printPlayers):
         
         """Kinda obvious isn't it?"""
+        
+        # A little something to help me print the player names
+        i = 0
         
         for name in self.blank_names:
 
             item_pos = 0
-
+            
+            print("?:", end=" ")
+            
+            if printPlayers:
+                new_name = ["".join(name[0]), "".join(name[1])]
+            
+                if new_name == self.names[i]:
+                    print(self.players[i], end=": ")
+            
             for item in name:
-
+                
                 # Prints the word
                 for letter in item:
                     print(letter, end="")
@@ -226,8 +253,14 @@ while drunk.checkComplete() == False:
     
     else:
         guess = input("Enter a word or letter to guess: ")
-        drunk.replaceInList(guess.lower(), False)
-        drunk.replaceInList(guess.upper(), True)
-        drunk.printBlankList()
+        
+        if len(guess) == 1:
+            drunk.replaceInList(guess.lower(), False)
+            drunk.replaceInList(guess.upper(), True)
+        
+        else:
+            drunk.replaceInList(guess, False)
+
+        drunk.printBlankList(False)
         drunk.printGuessedLetters()
         
