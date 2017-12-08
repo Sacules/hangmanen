@@ -6,13 +6,19 @@ class Hangmanen():
         self.list_name = "test.txt"
         self.names = []
         self.blank_names = []
+        self.guessedLetters = []
     
     
     def askForNames(self):
         
         """Prompts the user to enter the name of the list containing the names."""
         
-        pass
+        print("Name of the text file to load (without the extension): ",
+              end="")
+        
+        self.list_name = input()
+        print()
+        self.list_name += ".txt"
     
     
     def loadNames(self):
@@ -28,7 +34,7 @@ class Hangmanen():
 
                 # Separates artist and song name
                 self.names.append(line)
-                
+
 
     def createBlankNames(self):
         
@@ -93,7 +99,7 @@ class Hangmanen():
         return choice
     
     
-    def replaceInList(self, wordOrLetter):
+    def replaceInList(self, wordOrLetter, guessed):
         
         """Checks if the word or letter guessed is in the list. Then replaces
         it in the blank list."""
@@ -122,7 +128,11 @@ class Hangmanen():
                     # Letter
                     if len(wordOrLetter) == 1:
                         
-                        # Iterates until the whole item is replaced in blank
+                        if guessed == False:
+                            self.guessedLetters.append(wordOrLetter)
+                            guessed = True
+                        
+                        # Iterates until the whole letter is replaced in blank
                         while tail <= len(item):
                             
                             # Saves position
@@ -188,9 +198,22 @@ class Hangmanen():
         # New line at the end
         print()
     
+    
+    def printGuessedLetters(self):
+        
+        """Won't even bother to explain this."""
+        
+        print("Guessed letters: ", end="")
+        
+        for letter in self.guessedLetters:
+            print(letter.upper(), end=" ")
+        
+        print()
+    
 
 # Testing
 drunk = Hangmanen()
+drunk.askForNames()
 drunk.loadNames()
 drunk.createBlankNames()
 
@@ -203,6 +226,8 @@ while drunk.checkComplete() == False:
     
     else:
         guess = input("Enter a word or letter to guess: ")
-        drunk.replaceInList(guess.upper())
-        drunk.replaceInList(guess.lower())
+        drunk.replaceInList(guess.lower(), False)
+        drunk.replaceInList(guess.upper(), True)
         drunk.printBlankList()
+        drunk.printGuessedLetters()
+        
