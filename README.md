@@ -1,2 +1,2 @@
-# hangmanen
-For true Hangmanen adicts.
+# Hangmanen 2000
+For true addicts.
