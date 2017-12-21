@@ -81,6 +81,41 @@ class Hangmanen():
             self.blank_names.append(new_name)
 
 
+    def loadGuessesFile(self):
+        try:
+            with open(self.list_name + ' guesses', 'r', encoding='utf-8') as file:
+                for line in file:
+
+                    line = line.strip()
+                    
+                    if len(line) == 1:
+                        self.replaceInList(line.lower(), False)
+                        self.replaceInList(line.upper(), True)
+
+                    else:
+                        self.replaceInList(line, False)
+                    
+
+        except FileNotFoundError:
+            file = open(self.list_name + ' guesses', 'w', encoding='utf-8')
+            file.close()
+
+
+    def askGuess(self, wrong):
+        guess = input("Enter a word or letter to guess: ")
+        
+        if len(guess) == 1:
+            wrong += self.replaceInList(guess.lower(), False)
+            wrong += self.replaceInList(guess.upper(), True)
+        
+        else:
+            wrong += self.replaceInList(guess, False)
+
+        # Saves correct guesses
+        if wrong != 0:
+            self.saveGuess(guess)
+
+
     def checkComplete(self):
         
         """Checks if all the letters or words have been guessed."""
@@ -100,8 +135,9 @@ class Hangmanen():
         """Prompts the user to choose what to guess."""
         
         while True:
-            print(" 1. Guess a word or a letter. \n",
-                   "2. Exit. \n")
+            print("\n",
+                  "1. Guess a word or a letter. \n",
+                  "2. Exit. \n")
             
             choice = input("Choose one: ")
             choice = int(choice)
@@ -113,8 +149,16 @@ class Hangmanen():
                 break
         
         return choice
-    
-    
+
+
+    def saveGuess(self, guess):
+
+        """Puts them in a text file to be loaded later."""
+
+        with open(self.list_name + ' guesses', 'a', encoding='utf-8') as file:
+            file.write(guess + '\n')
+
+
     def replaceInList(self, wordOrLetter, guessed):
         
         """Checks if the word or letter guessed is in the list. Then replaces
@@ -243,24 +287,18 @@ drunk = Hangmanen()
 drunk.askForNames()
 drunk.loadNames()
 drunk.createBlankNames()
+drunk.loadGuessesFile()
+drunk.printBlankList(False)
+drunk.printGuessedLetters()
 
 while drunk.checkComplete() == False:
-    
+    wrong = 0    
     choice = drunk.askWordOrLetter()
     
     if choice == 2:
         break
     
     else:
-        guess = input("Enter a word or letter to guess: ")
-        
-        if len(guess) == 1:
-            drunk.replaceInList(guess.lower(), False)
-            drunk.replaceInList(guess.upper(), True)
-        
-        else:
-            drunk.replaceInList(guess, False)
-
+        drunk.askGuess(wrong)
         drunk.printBlankList(False)
         drunk.printGuessedLetters()
-        
