@@ -8,6 +8,7 @@ class Hangmanen():
         self.blank_names = []
         self.guessedLetters = []
         self.players = dict()
+        self.guessedPlayers = []
     
     
     def askForNames(self):
@@ -28,9 +29,6 @@ class Hangmanen():
         
         with open(self.list_name, "r", encoding='utf-8') as file:
             
-            # Just something to keep track of players, useful later
-            i = 0
-            
             for line in file:
                 
                 # Delete any extra space at the end
@@ -40,7 +38,7 @@ class Hangmanen():
                 temp = line.split(": ", maxsplit = 1)
                 
                 # Save player name in the dict
-                self.players[i] = temp[0]
+                self.players[temp[1]] = temp[0]
                 
                 # Save the song in the list
                 line = temp[1].split(" - ", maxsplit = 1)
@@ -48,9 +46,6 @@ class Hangmanen():
                 # Separates artist and song name
                 self.names.append(line)
                 
-                # Next player
-                i += 1
-
 
     def createBlankNames(self):
         
@@ -137,12 +132,13 @@ class Hangmanen():
         while True:
             print("\n",
                   "1. Guess a word or a letter. \n",
-                  "2. Exit. \n")
+                  "2. Show guessed player \n",
+                  "3. Exit. \n")
             
             choice = input("Choose one: ")
             choice = int(choice)
             
-            if choice != 1 and choice != 2:
+            if choice != 1 and choice != 2 and choice != 3:
                 print("Error, insert a valid number.")
 
             else:
@@ -233,7 +229,7 @@ class Hangmanen():
         return noHangman
     
     
-    def printBlankList(self, printPlayers):
+    def printBlankList(self):
         
         """Kinda obvious isn't it?"""
         
@@ -243,14 +239,14 @@ class Hangmanen():
         for name in self.blank_names:
 
             item_pos = 0
-            
-            print("?:", end=" ")
-            
-            if printPlayers:
-                new_name = ["".join(name[0]), "".join(name[1])]
-            
-                if new_name == self.names[i]:
-                    print(self.players[i], end=": ")
+
+            # When we have guessed a player
+            if name == self.names[i]:
+                if self.players[name] in guessedPlayers:
+                    print(self.players[name],  end=" ")
+
+            else:
+                print("?:", end=" ")
             
             for item in name:
                 
@@ -265,6 +261,9 @@ class Hangmanen():
             
             # New line after each song
             print()
+
+            # Moves to the next name in the original list
+            i += 1
         
         # New line at the end
         print()
@@ -272,7 +271,7 @@ class Hangmanen():
     
     def printGuessedLetters(self):
         
-        """Won't even bother to explain this."""
+        """Magic."""
         
         print("Guessed letters: ", end="")
         
@@ -282,23 +281,39 @@ class Hangmanen():
         print()
     
 
+    def askPlayerGuess(self):
+        guess = input("\nEnter the name of the guessed player: ")
+
+        self.guessedPlayers.append(guess)
+
+        print(self.guessedPlayers)
+        
+        
+
 # Testing
 drunk = Hangmanen()
 drunk.askForNames()
 drunk.loadNames()
 drunk.createBlankNames()
 drunk.loadGuessesFile()
-drunk.printBlankList(False)
+drunk.printBlankList()
 drunk.printGuessedLetters()
 
 while drunk.checkComplete() == False:
     wrong = 0    
     choice = drunk.askWordOrLetter()
-    
+
+    if choice == 1:
+        drunk.askGuess(wrong)
+        drunk.printBlankList()
+        drunk.printGuessedLetters()
+
     if choice == 2:
+        drunk.askPlayerGuess()
+        drunk.printBlankList()
+        drunk.printGuessedLetters()
+
+    if choice == 3:
         break
     
-    else:
-        drunk.askGuess(wrong)
-        drunk.printBlankList(False)
-        drunk.printGuessedLetters()
+        
