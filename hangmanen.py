@@ -72,7 +72,31 @@ class Hangmanen():
                     
                     elif letter == "-":
                         new_item = new_item + ["-"]
+                    
+                    elif letter == "(":
+                        new_item = new_item + ["("]
+                    
+                    elif letter == ")":
+                        new_item = new_item + [")"]
+                    
+                    elif letter == ",":
+                        new_item = new_item + [","]
+                    
+                    elif letter == ":":
+                        new_item = new_item + [":"]
                         
+                    elif letter == "?":
+                        new_item = new_item + ["?"]
+                    
+                    elif letter == ".":
+                        new_item = new_item + ["."]
+                    
+                    elif letter == "'":
+                        new_item = new_item + ["'"]
+                    
+                    elif letter == "&":
+                        new_item = new_item + ["&"]
+                    
                     else:
                         new_item = new_item + ["_"]
                 
