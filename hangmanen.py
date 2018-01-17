@@ -3,25 +3,34 @@ class Hangmanen():
     use on DTForums' roulette games."""
     
     def __init__(self):
+        
+        """"""
         self.list_name = "test.txt"
         self.names = []
-        self.blank_names = []
         self.guessedLetters = []
-        self.players = dict()
-    
-    
+
     def askForNames(self):
         
-        """Prompts the user to enter the name of the list containing the names."""
+        """A simple user prompt."""
         
         print("Name of the text file to load (without the extension): ",
               end="")
         
         self.list_name = input()
-        print()
-        self.list_name += ".txt"
+
+
+class Song():
     
-    
+    def __init__(self):
+        
+        """Basic info each entry holds."""
+        
+        self.player = ""
+        self.artist = ""
+        self.song = ""
+        self.blanksong = ""
+
+
     def loadNames(self):
         
         """Loads the list of names from a text file, one per line."""
