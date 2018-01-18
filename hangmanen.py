@@ -179,6 +179,7 @@ def replaceWords(replacing_name, guess, index):
     
     return "".join(replacing_name)
 
+
 def invalidWords(entries_list, guess):
 
     """This assumes you're writing the words exactly as they written in the entries.
@@ -207,68 +208,78 @@ def invalidWords(entries_list, guess):
     return hangman
 
 
-def loadGuessesFile(self):
-    try:
-        with open(LIST_NAME + ' guesses', 'r', encoding='utf-8') as file:
-            for line in file:
+def checkGuess(entries_list, guess, guessed_letters, guessed_words):
+    if isLetter(guess):
+        if invalidLetter(entries_list, guess):
+            print("ohnoes, a hangman!")
 
-                line = line.strip()
-
-                if len(line) == 1:
-                    replaceGuess(entries_list, gues)
-                    replaceGuess(entries_list, gues)
-
-                else:
-                    replaceGuess(entries_list, gues)
-
-
-    except FileNotFoundError:
-        file = open(LIST_NAME + ' guesses', 'w', encoding='utf-8')
-        file.close()
-
-
-def askGuess(self, wrong):
-    guess = input("Enter a word or letter to guess: ")
-
-    if len(guess) == 1:
-        wrong += replaceGuess(entries_list, gues)
-        wrong += replaceGuess(entries_list, gues)
+        else:
+            guessed_letters.append(guess)
 
     else:
-        wrong += replaceGuess(entries_list, gues)
+        if invalidWords(entries_list, guess):
+            print("hangman D:")
+        
+        else:
+            guessed_words.append(guess)
 
-    # Saves correct guesses
-    if wrong != 0:
-        self.saveGuess(guess)
+    return (guessed_letters, guessed_words)
 
 
-def checkComplete(self):
+def loadGuessesFile(LIST_NAME, entries_list, guessed_letters, guessed_words):
+    
+    """LIST_NAME must not end in '.txt'."""
+    
+    try:
+        with open(LIST_NAME + ' guesses.txt', 'r', encoding='utf-8') as file:
+            for line in file:
+                line = line.strip()
+                guessed_entries = checkGuess(entries_list, line, guessed_letters, guessed_words)
+                guessed_letters = guessed_entries[0]
+                guessed_words = guessed_entries[1]
+                
 
-    """Checks if all the letters or words have been guessed."""
+    except FileNotFoundError:
+        file = open(LIST_NAME + ' guesses.txt', 'w', encoding='utf-8')
+        file.close()
+    
+    return guessed_letters
 
-    for name in self.blank_names:
 
-        for item in name:
+def askGuess():
+    
+    """Water is wet."""
+    
+    guess = input("Enter a word or letter to guess: ")
+    
+    return guess
 
-            if "_" in item:
+
+def checkComplete(entries_list):
+
+    """Checks if all the entried and players have been guessed."""
+
+    for entry in entries_list:
+        if entry.artist != entry.blank_artist or entry.song != entry.blank_song:
+            if not entry.guessed_player:
                 return False
 
     return True
 
 
-def askWordOrLetter(self):
+def promptUser():
 
-    """Prompts the user to choose what to guess."""
+    """Gives the user some basic options."""
 
     while True:
-        print("\n",
-                      "1. Guess a word or a letter. \n",
-              "2. Exit. \n")
+        print("\n\n",
+              "1. Guess a word or a letter. \n",
+              "2. A player has been guessed. \n",
+              "3. Exit. \n")
 
         choice = input("Choose one: ")
-        choice = int(choice)
-
-        if choice != 1 and choice != 2:
+        
+        if choice != "1" and choice != "2" and choice != "3":
             print("Error, insert a valid number.")
 
         else:
@@ -277,104 +288,113 @@ def askWordOrLetter(self):
     return choice
 
 
-def saveGuess(self, guess):
+def saveGuess(LIST_NAME, guess):
 
     """Puts them in a text file to be loaded later."""
 
-    with open(LIST_NAME + ' guesses', 'a', encoding='utf-8') as file:
+    with open(LIST_NAME + ' guesses.txt', 'a', encoding='utf-8') as file:
         file.write(guess + '\n')
 
 
+def saveGuessedPlayer(LIST_NAME, player):
+    
+    """Same as above, but separate from it."""
+    
+    with open(LIST_NAME + " guessed players.txt", "a", encoding="utf-8") as file:
+        file.write(player + '\n')
 
 
-def printBlankList(self, printPlayers):
+def loadGuessedPlayers(LIST_NAME, entries_list):
+    
+    """Reads from a file then modifies the entry objects if it exists."""
+    
+    try:
+        with open(LIST_NAME + ' guessed players.txt', 'r', encoding='utf-8') as file:
+            for line in file:
+                line = line.strip()
+                guessedPlayer(entries_list, line)
+                
 
-    """Kinda obvious isn't it?"""
+    except FileNotFoundError:
+        file = open(LIST_NAME + ' guessed players.txt', 'w', encoding='utf-8')
+        file.close()       
+    
+    
+def guessedPlayer(entries_list, player):
+    
+    """Makes the player printable once it's been guessed."""
+    
+    for entry in entries_list:
+        if entry.player == player:
+            entry.guessed_player = True
+    
+    return entry.guessed_player
 
-    # A little something to help me print the player names
-    i = 0
 
-    for name in self.blank_names:
+def printBlankList(entries_list):
 
-        item_pos = 0
+    """Player: Artist - Song"""
 
-        print("?:", end=" ")
-
-        if printPlayers:
-            new_name = ["".join(name[0]), "".join(name[1])]
-
-            if new_name == self.names[i]:
-                print(self.players[i], end=": ")
-
-        for item in name:
-
-            # Prints the word
-            for letter in item:
-                print(letter, end="")
-
-            # After printing the artist, print a bar
-            if item_pos == 0:
-                print(" - ", end="")
-                item_pos += 1
-
-        # New line after each song
-        print()
-
-    # New line at the end
-    print()
+    for entry in entries_list:
+        if entry.guessed_player:
+            print(entry.player, end=": ")
+        
+        else:
+            print("?:", end=" ")
+        
+        print(entry.blank_artist, "-", entry.blank_song)
 
 
 def printGuessedLetters(guessed_letters):
 
-    """Won't even bother to explain this."""
+    """Mandatory docstring for consistent and aesthetic reasons."""
 
-    print("Guessed letters: ", end="")
+    print("\nGuessed letters: ", end="")
 
     for letter in guessed_letters:
         print(letter.upper(), end=" ")
 
-    print()
-
 
 def main():
-    # Important variables and lists
     LIST_NAME = askForName()
     entries_list = []
     entries_list = loadSongs(LIST_NAME, entries_list)
     guessed_letters = []
+    guessed_words = []
 
-    # This could be saved into a file then read, instead of being generated each run,
-    # but since performance doesn't matter here, I'll leave it that way
     saveBlankNames(entries_list)
+    loadGuessesFile(LIST_NAME, entries_list, guessed_letters, guessed_words)
+    loadGuessedPlayers(LIST_NAME, entries_list)
+    
+    printBlankList(entries_list)
+    printGuessedLetters(guessed_letters)
 
-    if invalidLetter(entries_list, "z"):
-        print("ohnoes, a hangman!")
+    while not checkComplete(entries_list):
+        choice = promptUser()
+        
+        if choice == "1":
+            guess = askGuess()
+            guessed_entries = checkGuess(entries_list, guess, guessed_letters, guessed_words)
+            guessed_letters = guessed_entries[0]
+            guessed_words = guessed_entries[1]
+            
+            if guess in guessed_letters or guess in guessed_words:
+                saveGuess(LIST_NAME, guess)
+        
+        elif choice == "2":
+            player = input("Write the name of the guessed player: ")
+            guessedPlayer(entries_list, player)
+            saveGuessedPlayer(LIST_NAME, player)
+        
+        elif choice == "3":
+            break
+        
 
-    if invalidWords(entries_list, "Townsend"):
-        print("hangman D:")
-
-    else:
-        print("no hangman fuck yeah. also you should save the guess here")
+        printBlankList(entries_list)
+        printGuessedLetters(guessed_letters)        
 
 
-    for i in entries_list:
-        print(i.blank_artist, "-", i.blank_song)
-
-    #loadGuessesFile()
-    #printBlankList(False)
-    #printGuessedLetters()
-
-    #while checkComplete() == False:
-        #wrong = 0    
-        #choice = askWordOrLetter()
-
-        #if choice == 2:
-            #break
-
-        #else:
-            #askGuess(wrong)
-            #printBlankList(False)
-            #printGuessedLetters()
+            
 
 
 
