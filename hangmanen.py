@@ -16,7 +16,7 @@ def askForName():
     return LIST_NAME
 
 
-def loadSongs(LIST_NAME, songs_list):
+def loadSongs(LIST_NAME, entries_list):
     
     """Loads the list of names from a text file, one per line."""
     
@@ -24,23 +24,23 @@ def loadSongs(LIST_NAME, songs_list):
 
         for line in file:
             
-            artist_and_song = Song()
+            entry = Song()
 
             # line = "Player: Artist - Song\n" 
             line = line.strip()
 
             # temp = ["Player", "Artist - Song"]
             temp = line.split(": ", maxsplit = 1)
-            artist_and_song.player = temp[0]
+            entry.player = temp[0]
 
             # temp2 = ["Artist", "Song"]
             temp2 = temp[1].split(" - ", maxsplit = 1)
-            artist_and_song.artist = temp2[0]
-            artist_and_song.song = temp2[1]
+            entry.artist = temp2[0]
+            entry.song = temp2[1]
 
-            songs_list.append(artist_and_song)
+            entries_list.append(entry)
         
-        return songs_list
+        return entries_list
             
 
 def createBlankName(name):
@@ -87,39 +87,88 @@ def createBlankName(name):
     return new_name
 
 
-def saveBlankNames(songs_list):
+def saveBlankNames(entries_list):
     
     """Since both artist and song have to be 'blanked', making a separate function
     is easier than copypasting the same code for each."""
     
-    for artist_and_song in songs_list:
-        artist_and_song.blank_artist = createBlankName(artist_and_song.artist)
-        artist_and_song.blank_song = createBlankName(artist_and_song.song)
+    for entry in entries_list:
+        entry.blank_artist = createBlankName(entry.artist)
+        entry.blank_song = createBlankName(entry.song)
 
 
-def validGuess(songs_list, guess):
+def isLetter(words):
     
-    """Since performance doesn't matter, just cheking if the guess is valid is
-    enough for this fuction."""
+    """This looks nicer and more understandable instead of just using the comparison."""
     
-    for artist_and_song in songs_list:
+    return len(words) == 1
+
+
+def findIndexes(word, letter):
+    
+    """Iterates over a word and returns a list with the positions in which
+    a letter apears on it."""
+    
+    index = 0
+    index_list = []
+    
+    for character in word:
+        if character == letter:
+            index_list.append(index)
         
-        if guess in artist_and_song.artist:
-            return True
-        
-        elif guess in artist_and_song.song:
-            return True
-        
-        else:
-            return False
+        index += 1
+    
+    return index_list
+    
+
+def replaceLetters(name, letter, replacing_name):
+    
+    index_list = findIndexes(name, letter)
+    
+    # Since strings are immutable, we need to transform it into a list
+    replacing_name = list(replacing_name)
+    
+    if index_list != []:
+        for index in index_list:
+            replacing_name[index] = letter
+    
+    # We put it as a string back again
+    return "".join(replacing_name)
 
 
-def replaceGuess(songs_list, guess):
+def invalidLetter(entries_list, guess):
     
-    """...in the blank names."""
+    """Only replaces the letter if it exists on the entry, otherwise prepare for hangman."""
     
+    hangman = True
+    guess_lower = guess.lower()
+    guess_upper = guess.upper()
+    
+    for entry in entries_list:
+        
+        # There will only be hangman if none of these is valid
+        if guess_lower in entry.artist:
+            entry.blank_artist = replaceLetters(entry.artist, guess_lower, entry.blank_artist)
+            hangman = False
+
+        if guess_lower in entry.song:
+            entry.blank_song = replaceLetters(entry.song, guess_lower, entry.blank_song)
+            hangman = False
+
+        if guess_upper in entry.artist:
+            entry.blank_artist = replaceLetters(entry.artist, guess_upper, entry.blank_artist)
+            hangman = False
+
+        if guess_upper in entry.song:
+            entry.blank_song = replaceLetters(entry.song, guess_upper, entry.blank_song)
+            hangman = False
+
+    return hangman
+
+
+def invalidWords(entries_list, guess):
     pass
-    
+
 
 def loadGuessesFile(self):
     try:
@@ -129,11 +178,11 @@ def loadGuessesFile(self):
                 line = line.strip()
                 
                 if len(line) == 1:
-                    replaceGuess(songs_list, guess)
-                    replaceGuess(songs_list, guess)
+                    replaceGuess(entries_list, gues)
+                    replaceGuess(entries_list, gues)
 
                 else:
-                    replaceGuess(songs_list, guess)
+                    replaceGuess(entries_list, gues)
                 
 
     except FileNotFoundError:
@@ -145,11 +194,11 @@ def askGuess(self, wrong):
     guess = input("Enter a word or letter to guess: ")
     
     if len(guess) == 1:
-        wrong += replaceGuess(songs_list, guess)
-        wrong += replaceGuess(songs_list, guess)
+        wrong += replaceGuess(entries_list, gues)
+        wrong += replaceGuess(entries_list, gues)
     
     else:
-        wrong += replaceGuess(songs_list, guess)
+        wrong += replaceGuess(entries_list, gues)
 
     # Saves correct guesses
     if wrong != 0:
@@ -253,13 +302,22 @@ def printGuessedLetters(guessed_letters):
 def main():
     # Important variables and lists
     LIST_NAME = askForName()
-    songs_list = []
-    songs_list = loadSongs(LIST_NAME, songs_list)
+    entries_list = []
+    entries_list = loadSongs(LIST_NAME, entries_list)
     guessed_letters = []
 
-    # This could be saved into a file then read of being generated each time,
+    # This could be saved into a file then read, instead of being generated each run,
     # but since performance doesn't matter here, I'll leave it that way
-    saveBlankNames(songs_list)
+    saveBlankNames(entries_list)
+
+    if invalidLetter(entries_list, "z"):
+        print("ohnoes, a hangman!")
+    
+    else:
+        print("no hangman fuck yeah. also you should save the guess here")
+        
+    for i in entries_list:
+        print(i.blank_artist, "-", i.blank_song)
     
     #loadGuessesFile()
     #printBlankList(False)
