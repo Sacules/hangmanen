@@ -1,4 +1,4 @@
-class Song():
+class Entry():
     
     def __init__(self):
         
