@@ -1,337 +1,282 @@
-class Hangmanen():
-    """Modified hangman with multiple phrases as entries. Originaly designed for
-    use on DTForums' roulette games."""
+"""
+Modified hangman with multiple songs as entries. Originaly designed for
+use on DTForums' roulette games.
+"""
+from Song import *
+
+
+def askForName():
+        
+    """A simple user prompt."""
+        
+    print("Name of the text file to load (without the extension): ", end="")
+        
+    LIST_NAME = input()
     
-    def __init__(self):
-        
-        """"""
-        self.list_name = "test.txt"
-        self.names = []
-        self.guessedLetters = []
-
-    def askForNames(self):
-        
-        """A simple user prompt."""
-        
-        print("Name of the text file to load (without the extension): ",
-              end="")
-        
-        self.list_name = input()
+    return LIST_NAME
 
 
-class Song():
+def loadSongs(LIST_NAME, songs_list):
     
-    def __init__(self):
-        
-        """Basic info each entry holds."""
-        
-        self.player = ""
-        self.artist = ""
-        self.song = ""
-        self.blanksong = ""
+    """Loads the list of names from a text file, one per line."""
+    
+    with open(LIST_NAME + ".txt", "r", encoding='utf-8') as file:
 
-
-    def loadNames(self):
-        
-        """Loads the list of names from a text file, one per line."""
-        
-        with open(self.list_name, "r", encoding='utf-8') as file:
+        for line in file:
             
-            # Just something to keep track of players, useful later
-            i = 0
-            
-            for line in file:
-                
-                # Delete any extra space at the end
-                line = line.strip()
-                
-                # Separate player name and song in a temporary list
-                temp = line.split(": ", maxsplit = 1)
-                
-                # Save player name in the dict
-                self.players[i] = temp[0]
-                
-                # Save the song in the list
-                line = temp[1].split(" - ", maxsplit = 1)
+            artist_and_song = Song()
 
-                # Separates artist and song name
-                self.names.append(line)
-                
-                # Next player
-                i += 1
+            # line = "Player: Artist - Song\n" 
+            line = line.strip()
 
+            # temp = ["Player", "Artist - Song"]
+            temp = line.split(": ", maxsplit = 1)
+            artist_and_song.player = temp[0]
 
-    def createBlankNames(self):
+            # temp2 = ["Artist", "Song"]
+            temp2 = temp[1].split(" - ", maxsplit = 1)
+            artist_and_song.artist = temp2[0]
+            artist_and_song.song = temp2[1]
+
+            songs_list.append(artist_and_song)
         
-        """Based on the names loaded, creates the blanks for the player to
-        guess. They're saved in a text file."""
+        return songs_list
+            
+
+def createBlankName(name):
+    
+    """Based on the names loaded, creates the blanks for the player to
+    guess. They're saved in a text file."""
+    
+    new_name = ""
+    
+    for letter in name:
+        if letter == " ":
+            new_name = new_name + " "
         
-        for name in self.names:
-            
-            new_name = []
-            
-            for item in name:
-                
-                new_item = []
-                
-                for letter in item:
-                    
-                    if letter == " ":
-                        new_item = new_item + [" "]
-                    
-                    elif letter == "-":
-                        new_item = new_item + ["-"]
-                    
-                    elif letter == "(":
-                        new_item = new_item + ["("]
-                    
-                    elif letter == ")":
-                        new_item = new_item + [")"]
-                    
-                    elif letter == ",":
-                        new_item = new_item + [","]
-                    
-                    elif letter == ":":
-                        new_item = new_item + [":"]
-                        
-                    elif letter == "?":
-                        new_item = new_item + ["?"]
-                    
-                    elif letter == ".":
-                        new_item = new_item + ["."]
-                    
-                    elif letter == "'":
-                        new_item = new_item + ["'"]
-                    
-                    elif letter == "&":
-                        new_item = new_item + ["&"]
-                    
-                    else:
-                        new_item = new_item + ["_"]
-                
-                new_name.append(new_item)
-            
-            self.blank_names.append(new_name)
-
-
-    def loadGuessesFile(self):
-        try:
-            with open(self.list_name + ' guesses', 'r', encoding='utf-8') as file:
-                for line in file:
-
-                    line = line.strip()
-                    
-                    if len(line) == 1:
-                        self.replaceInList(line.lower(), False)
-                        self.replaceInList(line.upper(), True)
-
-                    else:
-                        self.replaceInList(line, False)
-                    
-
-        except FileNotFoundError:
-            file = open(self.list_name + ' guesses', 'w', encoding='utf-8')
-            file.close()
-
-
-    def askGuess(self, wrong):
-        guess = input("Enter a word or letter to guess: ")
+        elif letter == "-":
+            new_name = new_name + "-"
         
-        if len(guess) == 1:
-            wrong += self.replaceInList(guess.lower(), False)
-            wrong += self.replaceInList(guess.upper(), True)
+        elif letter == "(":
+            new_name = new_name + "("
+        
+        elif letter == ")":
+            new_name = new_name + ")"
+        
+        elif letter == ",":
+            new_name = new_name + ","
+        
+        elif letter == ":":
+            new_name = new_name + ":"
+            
+        elif letter == "?":
+            new_name = new_name + "?"
+        
+        elif letter == ".":
+            new_name = new_name + "."
+        
+        elif letter == "'":
+            new_name = new_name + "'"
+        
+        elif letter == "&":
+            new_name = new_name + "&"
         
         else:
-            wrong += self.replaceInList(guess, False)
+            new_name = new_name + "_"
 
-        # Saves correct guesses
-        if wrong != 0:
-            self.saveGuess(guess)
+    return new_name
 
 
-    def checkComplete(self):
+def saveBlankNames(songs_list):
+    
+    """Since both artist and song have to be 'blanked', making a separate function
+    is easier than copypasting the same code for each."""
+    
+    for artist_and_song in songs_list:
+        artist_and_song.blank_artist = createBlankName(artist_and_song.artist)
+        artist_and_song.blank_song = createBlankName(artist_and_song.song)
+
+
+def validGuess(songs_list, guess):
+    
+    """Since performance doesn't matter, just cheking if the guess is valid is
+    enough for this fuction."""
+    
+    for artist_and_song in songs_list:
         
-        """Checks if all the letters or words have been guessed."""
+        if guess in artist_and_song.artist:
+            return True
         
-        for name in self.blank_names:
-            
-            for item in name:
+        elif guess in artist_and_song.song:
+            return True
+        
+        else:
+            return False
+
+
+def replaceGuess(songs_list, guess):
+    
+    """...in the blank names."""
+    
+    pass
+    
+
+def loadGuessesFile(self):
+    try:
+        with open(LIST_NAME + ' guesses', 'r', encoding='utf-8') as file:
+            for line in file:
+
+                line = line.strip()
                 
-                if "_" in item:
-                    return False
-        
-        return True
+                if len(line) == 1:
+                    replaceGuess(songs_list, guess)
+                    replaceGuess(songs_list, guess)
 
-
-    def askWordOrLetter(self):
-        
-        """Prompts the user to choose what to guess."""
-        
-        while True:
-            print("\n",
-                  "1. Guess a word or a letter. \n",
-                  "2. Exit. \n")
-            
-            choice = input("Choose one: ")
-            choice = int(choice)
-            
-            if choice != 1 and choice != 2:
-                print("Error, insert a valid number.")
-
-            else:
-                break
-        
-        return choice
-
-
-    def saveGuess(self, guess):
-
-        """Puts them in a text file to be loaded later."""
-
-        with open(self.list_name + ' guesses', 'a', encoding='utf-8') as file:
-            file.write(guess + '\n')
-
-
-    def replaceInList(self, wordOrLetter, guessed):
-        
-        """Checks if the word or letter guessed is in the list. Then replaces
-        it in the blank list."""
-        
-        # Initial name
-        name_pos = 0
-        
-        # Will remain this if the word or letter isn't found
-        noHangman = 0
-
-        for name in self.names:
-            
-            # First check on band name
-            item_pos = 0
-            
-            for item in name:
+                else:
+                    replaceGuess(songs_list, guess)
                 
-                char_pos = 0
-                tail = 0
-                
-                if wordOrLetter in item:
-                    
-                    # No body part gets drawn
-                    noHangman = 1
-                    
-                    # Letter
-                    if len(wordOrLetter) == 1:
-                        
-                        if guessed == False:
-                            self.guessedLetters.append(wordOrLetter)
-                            guessed = True
-                        
-                        # Iterates until the whole letter is replaced in blank
-                        while tail <= len(item):
-                            
-                            # Saves position
-                            char_pos = item.find(wordOrLetter, tail)
-                            
-                            # If there is no letter in the substring
-                            if char_pos == -1:
-                                break
-                            
-                            # Replace it
-                            self.blank_names[name_pos][item_pos][char_pos] = wordOrLetter
-                            
-                            # Take the substring after the first letter it finds
-                            tail = char_pos + 1
-                        
-                    
-                    # Word
-                    else:
-                        
-                        # Get position
-                        word_pos = item.find(wordOrLetter)
-                        
-                        for letter in wordOrLetter:
-                            
-                            # Replace one letter
-                            self.blank_names[name_pos][item_pos][word_pos] = letter
-                            
-                            # Move on to the next one
-                            word_pos += 1
-                        
 
-                # Switch to song name
-                item_pos = 1
+    except FileNotFoundError:
+        file = open(LIST_NAME + ' guesses', 'w', encoding='utf-8')
+        file.close()
 
-            # Switch to next name
-            name_pos += 1
-        
-        return noHangman
-    
-    
-    def printBlankList(self, printPlayers):
-        
-        """Kinda obvious isn't it?"""
-        
-        # A little something to help me print the player names
-        i = 0
-        
-        for name in self.blank_names:
 
-            item_pos = 0
-            
-            print("?:", end=" ")
-            
-            if printPlayers:
-                new_name = ["".join(name[0]), "".join(name[1])]
-            
-                if new_name == self.names[i]:
-                    print(self.players[i], end=": ")
-            
-            for item in name:
-                
-                # Prints the word
-                for letter in item:
-                    print(letter, end="")
-                
-                # After printing the artist, print a bar
-                if item_pos == 0:
-                    print(" - ", end="")
-                    item_pos += 1
-            
-            # New line after each song
-            print()
-        
-        # New line at the end
-        print()
+def askGuess(self, wrong):
+    guess = input("Enter a word or letter to guess: ")
     
-    
-    def printGuessedLetters(self):
-        
-        """Won't even bother to explain this."""
-        
-        print("Guessed letters: ", end="")
-        
-        for letter in self.guessedLetters:
-            print(letter.upper(), end=" ")
-        
-        print()
-    
-
-# Testing
-drunk = Hangmanen()
-drunk.askForNames()
-drunk.loadNames()
-drunk.createBlankNames()
-drunk.loadGuessesFile()
-drunk.printBlankList(False)
-drunk.printGuessedLetters()
-
-while drunk.checkComplete() == False:
-    wrong = 0    
-    choice = drunk.askWordOrLetter()
-    
-    if choice == 2:
-        break
+    if len(guess) == 1:
+        wrong += replaceGuess(songs_list, guess)
+        wrong += replaceGuess(songs_list, guess)
     
     else:
-        drunk.askGuess(wrong)
-        drunk.printBlankList(False)
-        drunk.printGuessedLetters()
+        wrong += replaceGuess(songs_list, guess)
+
+    # Saves correct guesses
+    if wrong != 0:
+        self.saveGuess(guess)
+
+
+def checkComplete(self):
+    
+    """Checks if all the letters or words have been guessed."""
+    
+    for name in self.blank_names:
+        
+        for item in name:
+            
+            if "_" in item:
+                return False
+    
+    return True
+
+
+def askWordOrLetter(self):
+    
+    """Prompts the user to choose what to guess."""
+    
+    while True:
+        print("\n",
+              "1. Guess a word or a letter. \n",
+              "2. Exit. \n")
+        
+        choice = input("Choose one: ")
+        choice = int(choice)
+        
+        if choice != 1 and choice != 2:
+            print("Error, insert a valid number.")
+
+        else:
+            break
+    
+    return choice
+
+
+def saveGuess(self, guess):
+
+    """Puts them in a text file to be loaded later."""
+
+    with open(LIST_NAME + ' guesses', 'a', encoding='utf-8') as file:
+        file.write(guess + '\n')
+
+
+
+
+def printBlankList(self, printPlayers):
+    
+    """Kinda obvious isn't it?"""
+    
+    # A little something to help me print the player names
+    i = 0
+    
+    for name in self.blank_names:
+
+        item_pos = 0
+        
+        print("?:", end=" ")
+        
+        if printPlayers:
+            new_name = ["".join(name[0]), "".join(name[1])]
+        
+            if new_name == self.names[i]:
+                print(self.players[i], end=": ")
+        
+        for item in name:
+            
+            # Prints the word
+            for letter in item:
+                print(letter, end="")
+            
+            # After printing the artist, print a bar
+            if item_pos == 0:
+                print(" - ", end="")
+                item_pos += 1
+        
+        # New line after each song
+        print()
+    
+    # New line at the end
+    print()
+
+
+def printGuessedLetters(guessed_letters):
+    
+    """Won't even bother to explain this."""
+    
+    print("Guessed letters: ", end="")
+    
+    for letter in guessed_letters:
+        print(letter.upper(), end=" ")
+    
+    print()
+    
+
+def main():
+    # Important variables and lists
+    LIST_NAME = askForName()
+    songs_list = []
+    songs_list = loadSongs(LIST_NAME, songs_list)
+    guessed_letters = []
+
+    # This could be saved into a file then read of being generated each time,
+    # but since performance doesn't matter here, I'll leave it that way
+    saveBlankNames(songs_list)
+    
+    #loadGuessesFile()
+    #printBlankList(False)
+    #printGuessedLetters()
+    
+    #while checkComplete() == False:
+        #wrong = 0    
+        #choice = askWordOrLetter()
+        
+        #if choice == 2:
+            #break
+        
+        #else:
+            #askGuess(wrong)
+            #printBlankList(False)
+            #printGuessedLetters()
+
+
+
+main()
