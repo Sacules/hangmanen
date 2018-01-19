@@ -49,40 +49,16 @@ def createBlankName(name):
     guess. They're saved in a text file."""
 
     new_name = ""
-
+    special_chars = " -(),.:;?!'&"
+    
     for letter in name:
-        if letter == " ":
-            new_name = new_name + " "
-
-        elif letter == "-":
-            new_name = new_name + "-"
-
-        elif letter == "(":
-            new_name = new_name + "("
-
-        elif letter == ")":
-            new_name = new_name + ")"
-
-        elif letter == ",":
-            new_name = new_name + ","
-
-        elif letter == ":":
-            new_name = new_name + ":"
-
-        elif letter == "?":
-            new_name = new_name + "?"
-
-        elif letter == ".":
-            new_name = new_name + "."
-
-        elif letter == "'":
-            new_name = new_name + "'"
-
-        elif letter == "&":
-            new_name = new_name + "&"
-
-        else:
+        index = special_chars.find(letter)
+        
+        if index == -1:
             new_name = new_name + "_"
+        
+        else:
+            new_name = new_name + special_chars[index]
 
     return new_name
 
