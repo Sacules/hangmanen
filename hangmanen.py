@@ -54,6 +54,7 @@ def createBlankName(name):
     for letter in name:
         index = special_chars.find(letter)
         
+        # The letter is no special character
         if index == -1:
             new_name = new_name + "_"
         
@@ -75,41 +76,9 @@ def saveBlankNames(entries_list):
 
 def isLetter(words):
 
-    """This looks nicer and more understandable instead of just using the comparison."""
+    """This looks nicer and more understandable instead of just using a '==' comparison."""
 
     return len(words) == 1
-
-
-def findIndexes(word, letter):
-
-    """Iterates over a word and returns a list with the positions in which
-    a letter apears on it."""
-
-    index = 0
-    index_list = []
-
-    for character in word:
-        if character == letter:
-            index_list.append(index)
-
-        index += 1
-
-    return index_list
-
-
-def replaceLetters(name, letter, replacing_name):
-
-    index_list = findIndexes(name, letter)
-
-    # Since strings are immutable, we need to transform it into a list
-    replacing_name = list(replacing_name)
-
-    if index_list != []:
-        for index in index_list:
-            replacing_name[index] = letter
-
-    # We put it as a string back again
-    return "".join(replacing_name)
 
 
 def invalidLetter(entries_list, guess):
@@ -122,38 +91,24 @@ def invalidLetter(entries_list, guess):
 
     for entry in entries_list:
 
-        # There will only be hangman if none of these is valid
+        # The letter has to be checked in both the artist and song names, in lower and uppercase
         if guess_lower in entry.artist:
-            entry.blank_artist = replaceLetters(entry.artist, guess_lower, entry.blank_artist)
+            entry.blank_artist = entry.replaceLetter(entry.artist, guess_lower, entry.blank_artist)
             hangman = False
 
         if guess_lower in entry.song:
-            entry.blank_song = replaceLetters(entry.song, guess_lower, entry.blank_song)
+            entry.blank_song = entry.replaceLetter(entry.song, guess_lower, entry.blank_song)
             hangman = False
 
         if guess_upper in entry.artist:
-            entry.blank_artist = replaceLetters(entry.artist, guess_upper, entry.blank_artist)
+            entry.blank_artist = entry.replaceLetter(entry.artist, guess_upper, entry.blank_artist)
             hangman = False
 
         if guess_upper in entry.song:
-            entry.blank_song = replaceLetters(entry.song, guess_upper, entry.blank_song)
+            entry.blank_song = entry.replaceLetter(entry.song, guess_upper, entry.blank_song)
             hangman = False
 
     return hangman
-
-
-def replaceWords(replacing_name, guess, index):
-
-    """Assume this won't go out of index range. Please."""
-
-    replacing_name = list(replacing_name)
-    guess = list(guess)
-
-    for character in guess:
-        replacing_name[index] = character
-        index += 1
-    
-    return "".join(replacing_name)
 
 
 def invalidWords(entries_list, guess):
@@ -162,44 +117,52 @@ def invalidWords(entries_list, guess):
        No spellchecking, this is case-sensitive. Enter either artist or song name
        (or part of either) here, but not both."""
 
-    hangman = True
-
     for entry in entries_list:
 
         index = entry.artist.find(guess)
 
         if index != -1:
-            entry.blank_artist = replaceWords(entry.blank_artist, guess, index)
-            hangman = False
-            break
+            entry.blank_artist = entry.replaceWords(entry.blank_artist, guess, index)
+            
+            return False
 
         else:
             index = entry.song.find(guess)
 
             if index != -1:
-                entry.blank_song = replaceWords(entry.blank_song, guess, index)
-                hangman = False
-                break
+                entry.blank_song = entry.replaceWords(entry.blank_song, guess, index)
 
-    return hangman
+                return False
+
+    else:
+        return True
 
 
 def checkGuess(entries_list, guess, guessed_letters, guessed_words):
-    if isLetter(guess):
-        if invalidLetter(entries_list, guess):
-            print("ohnoes, a hangman!")
-
-        else:
-            guessed_letters.append(guess)
-
+    
+    """It is important to separate what kind of guess the player is giving and save the correct ones."""
+    
+    if guess in guessed_letters or guess in guessed_words:
+        print("Guess is already existing. Try another one.")
+    
     else:
-        if invalidWords(entries_list, guess):
-            print("hangman D:")
-        
+        if isLetter(guess):
+            if invalidLetter(entries_list, guess):
+                print("ohnoes, a hangman!")
+    
+            else:
+                # make a for loop and call the replace method?
+                guessed_letters.append(guess)
+    
         else:
-            guessed_words.append(guess)
-
-    return (guessed_letters, guessed_words)
+            if invalidWords(entries_list, guess):
+                print(guess)
+                print("hangman D:")
+            
+            else:
+                guessed_words.append(guess)
+    
+        return (guessed_letters, guessed_words)
 
 
 def loadGuessesFile(LIST_NAME, entries_list, guessed_letters, guessed_words):
@@ -210,16 +173,21 @@ def loadGuessesFile(LIST_NAME, entries_list, guessed_letters, guessed_words):
         with open(LIST_NAME + ' guesses.txt', 'r', encoding='utf-8') as file:
             for line in file:
                 line = line.strip()
+                
+                if "\ufeff" in line:
+                    line = line.replace("\ufeff", "")
+                
                 guessed_entries = checkGuess(entries_list, line, guessed_letters, guessed_words)
+                
                 guessed_letters = guessed_entries[0]
                 guessed_words = guessed_entries[1]
-                
 
     except FileNotFoundError:
         file = open(LIST_NAME + ' guesses.txt', 'w', encoding='utf-8')
         file.close()
     
-    return guessed_letters
+    finally:
+        return guessed_letters
 
 
 def askGuess():
@@ -233,19 +201,20 @@ def askGuess():
 
 def checkComplete(entries_list):
 
-    """Checks if all the entried and players have been guessed."""
+    """If all entries have been guessed, game is over."""
 
     for entry in entries_list:
         if entry.artist != entry.blank_artist or entry.song != entry.blank_song:
             if not entry.guessed_player:
                 return False
-
-    return True
+    
+    else:
+        return True
 
 
 def promptUser():
 
-    """Gives the user some basic options."""
+    """Main game options."""
 
     while True:
         print("\n\n",
@@ -298,7 +267,7 @@ def loadGuessedPlayers(LIST_NAME, entries_list):
     
 def guessedPlayer(entries_list, player):
     
-    """Makes the player printable once it's been guessed."""
+    """Looks for the the player and makes it printable once it's been guessed."""
     
     for entry in entries_list:
         if entry.player == player:
@@ -309,7 +278,10 @@ def guessedPlayer(entries_list, player):
 
 def printBlankList(entries_list):
 
-    """Player: Artist - Song"""
+    """Prints it using the folloowing format:
+       
+       Player: Artist - Song
+    """
 
     for entry in entries_list:
         if entry.guessed_player:
@@ -323,7 +295,7 @@ def printBlankList(entries_list):
 
 def printGuessedLetters(guessed_letters):
 
-    """Mandatory docstring for consistent and aesthetic reasons."""
+    """Helps to keep track of what's been guessed."""
 
     print("\nGuessed letters: ", end="")
 
