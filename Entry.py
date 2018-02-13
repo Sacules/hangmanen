@@ -13,11 +13,12 @@ class Entry():
         self.song = ""
         self.blank_song = ""
 
-
     def findIndexes(self, word, letter):
 
-        """Iterates over a word and returns a list with the positions in which
-        a letter apears on it."""
+        """
+        Iterates over a word and returns a list with the positions in
+        which a letter apears on it.
+        """
 
         index = 0
         index_list = []
@@ -30,10 +31,12 @@ class Entry():
     
         return index_list
 
-
     def replaceLetter(self, name, letter, replacing_name):
 
-        """When a guessed letter is valid, all instances of it have to be replaced."""
+        """
+        When a guessed letter is valid, all instances of it have
+        to be replaced.
+        """
 
         index_list = self.findIndexes(name, letter)
 
@@ -47,10 +50,11 @@ class Entry():
         # We put it as a string back again
         return "".join(replacing_name)
 
-
     def replaceWords(self, replacing_name, guess, index):
     
-        """Assume this won't go out of index range. Please."""
+        """
+        Assume this won't go out of index range. Please.
+        """
     
         replacing_name = list(replacing_name)
         guess = list(guess)
