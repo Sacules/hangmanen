@@ -3,7 +3,7 @@ Modified hangman with multiple songs as entries. Originaly designed for
 use on DTForums' roulette games.
 """
 from Entry import *
-
+from EP import *
 
 def askForName():
 
