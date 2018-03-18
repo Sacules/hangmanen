@@ -64,3 +64,12 @@ class Entry():
             index += 1
         
         return "".join(replacing_name)
+    
+    def printEntry(self):
+        if self.guessed_player:
+            print(self.player, end=": ")
+        
+        else:
+            print("?:", end=" ")
+        
+        print(self.blank_artist, "-", self.blank_song)

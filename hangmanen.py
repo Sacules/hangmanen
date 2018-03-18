@@ -2,18 +2,10 @@
 Modified hangman with multiple songs as entries. Originaly designed for
 use on DTForums' roulette games.
 """
+
+from generic_functions import *
 from Entry import *
 from EP import *
-
-def askForName():
-
-    """A simple user prompt."""
-
-    print("Name of the text file to load (without the extension): ", end="")
-
-    LIST_NAME = input()
-
-    return LIST_NAME
 
 
 def loadSongs(LIST_NAME, entries_list):
@@ -43,27 +35,7 @@ def loadSongs(LIST_NAME, entries_list):
         return entries_list
 
 
-def createBlankName(name):
 
-    """
-    Based on the names loaded, creates the blanks for the player to
-    guess. They're saved in a text file.
-    """
-
-    new_name = ""
-    special_chars = " -(),.:;?!'&"
-    
-    for letter in name:
-        index = special_chars.find(letter)
-        
-        # The letter is no special character
-        if index == -1:
-            new_name = new_name + "_"
-        
-        else:
-            new_name = new_name + special_chars[index]
-
-    return new_name
 
 
 def saveBlankNames(entries_list):
@@ -76,16 +48,6 @@ def saveBlankNames(entries_list):
     for entry in entries_list:
         entry.blank_artist = createBlankName(entry.artist)
         entry.blank_song = createBlankName(entry.song)
-
-
-def isLetter(words):
-
-    """
-    This looks nicer and more understandable instead of just 
-    using a '==' comparison.
-    """
-
-    return len(words) == 1
 
 
 def invalidLetter(entries_list, guess):
@@ -214,15 +176,6 @@ def loadGuessesFile(LIST_NAME, entries_list, guessed_letters, guessed_words):
         return guessed_letters
 
 
-def askGuess():
-    
-    """Water is wet."""
-    
-    guess = input("Enter a word or letter to guess: ")
-    
-    return guess
-
-
 def checkComplete(entries_list):
 
     """If all entries have been guessed, game is over."""
@@ -311,7 +264,8 @@ def guessedPlayer(entries_list, player):
 
 def printBlankList(entries_list):
 
-    """Prints it using the folloowing format:
+    """
+    Prints it using the folloowing format:
        
        Player: Artist - Song
     """
