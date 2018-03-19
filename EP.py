@@ -35,7 +35,7 @@ class EP():
     def printGuessedEP(self):
         # Title
         if self.guessed_player:
-            print(self.player_name. end=' ')
+            print(self.player_name, end=' ')
 
         else:
             print("?", end=': ')
