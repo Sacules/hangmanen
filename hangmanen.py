@@ -35,9 +35,6 @@ def loadSongs(LIST_NAME, entries_list):
         return entries_list
 
 
-
-
-
 def saveBlankNames(entries_list):
 
     """
@@ -53,7 +50,7 @@ def saveBlankNames(entries_list):
 def invalidLetter(entries_list, guess):
 
     """
-    Only replaces the letter if it exists on the entry, 
+    Only replaces the letter if it exists on the entry,
     otherwise prepare for hangman.
     """
 
@@ -91,32 +88,34 @@ def invalidLetter(entries_list, guess):
 def invalidWords(entries_list, guess):
 
     """
-    This assumes you're writing the words exactly as they written in 
-    the entries. No spellchecking, this is case-sensitive. Enter either 
+    This assumes you're writing the words exactly as they written in
+    the entries. No spellchecking, this is case-sensitive. Enter either
     artist or song name (or part of either) here, but not both.
     """
 
+    invalid = True
+
     for entry in entries_list:
 
+	# Looks into the artist
         index = entry.artist.find(guess)
 
         if index != -1:
-            entry.blank_artist = entry.replaceWords(entry.blank_artist, 
+            entry.blank_artist = entry.replaceWords(entry.blank_artist,
                                                     guess, index)
-            
-            return False
 
+            invalid = False
+
+	# Looks into the song
         else:
             index = entry.song.find(guess)
 
             if index != -1:
-                entry.blank_song = entry.replaceWords(entry.blank_song, 
+                entry.blank_song = entry.replaceWords(entry.blank_song,
                                                       guess, index)
+                invalid = False
 
-                return False
-
-    else:
-        return True
+    return invalid
 
 
 def checkGuess(entries_list, guess, guessed_letters, guessed_words):
@@ -125,28 +124,27 @@ def checkGuess(entries_list, guess, guessed_letters, guessed_words):
     It is important to separate what kind of guess the player is
     giving and save the correct ones.
     """
-    
+
     while guess in guessed_letters or guess in guessed_words:
         print("\nGuess is already existing. Try another one.")
         guess = input("New guess: ")
-    
+
     else:
         if isLetter(guess):
             if invalidLetter(entries_list, guess):
                 print("ohnoes, a hangman!")
-    
+
             else:
-                # make a for loop and call the replace method?
                 guessed_letters.append(guess)
-    
+
         else:
             if invalidWords(entries_list, guess):
                 print(guess)
                 print("hangman D:")
-            
+
             else:
                 guessed_words.append(guess)
-    
+
         return (guessed_letters, guessed_words)
 
 
@@ -300,7 +298,7 @@ def main():
     saveBlankNames(entries_list)
     loadGuessesFile(LIST_NAME, entries_list, guessed_letters, guessed_words)
     loadGuessedPlayers(LIST_NAME, entries_list)
-    
+
     printBlankList(entries_list)
     printGuessedLetters(guessed_letters)
 
@@ -309,7 +307,7 @@ def main():
         
         if choice == "1":
             guess = askGuess()
-            guessed_entries = checkGuess(entries_list, guess, 
+            guessed_entries = checkGuess(entries_list, guess,
                                          guessed_letters, guessed_words)
             guessed_letters = guessed_entries[0]
             guessed_words = guessed_entries[1]
