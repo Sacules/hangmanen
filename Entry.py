@@ -1,3 +1,5 @@
+from generic_functions import *
+
 class Entry():
     
     def __init__(self):
@@ -13,24 +15,6 @@ class Entry():
         self.song = ""
         self.blank_song = ""
 
-    def findIndexes(self, word, letter):
-
-        """
-        Iterates over a word and returns a list with the positions in
-        which a letter apears on it.
-        """
-
-        index = 0
-        index_list = []
-
-        for character in word:
-            if character == letter:
-                index_list.append(index)
-
-            index += 1
-    
-        return index_list
-
     def replaceLetter(self, name, letter, replacing_name):
 
         """
@@ -38,7 +22,7 @@ class Entry():
         to be replaced.
         """
 
-        index_list = self.findIndexes(name, letter)
+        index_list = findIndexes(name, letter)
 
         # Since strings are immutable, we need to transform it into a list
         replacing_name = list(replacing_name)

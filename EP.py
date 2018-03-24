@@ -6,7 +6,7 @@ class EP():
     """Simple container for several entries."""
     
     def __init__(self):
-        
+        # Lists for the tracks where the player has been guesed or not
         self.entry_list_unguessed = []
         self.entry_list_guessed = []
 
@@ -25,8 +25,8 @@ class EP():
     def getEPName(self, EP_name):
         self.EP_name = EP_name
         
-    def makeEPNameBlank(self, EP_name):
-        self.blank_EP_name = createBlankName(EP_name)
+    def makeEPNameBlank(self):
+        self.blank_EP_name = createBlankName(self.EP_name)
     
     def guessedEntry(self, entry):
         self.entry_list_guessed.append(entry)

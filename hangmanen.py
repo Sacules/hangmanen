@@ -7,44 +7,79 @@ from generic_functions import *
 from Entry import *
 from EP import *
 
+IS_EP_ROUND = False
 
 def loadSongs(LIST_NAME, entries_list):
 
-    """Loads the list of names from a text file, one per line."""
+    """
+    Loads the list of names from a text file, one per line.
+    """
 
     with open(LIST_NAME + ".txt", "r", encoding='utf-8') as file:
+        if IS_EP_ROUND:
+            for line in file:
+                # EPs begin with:
+                # Player: Title
+                title_line = line.split(": ", maxsplit=1)
+                
+                if len(title_line) == 2:
+                    EP_entry = EP()
+                    entries_list.append(EP_entry)
+                    EP_entry.getPlayer(title_line[0])
+                    EP_entry.getEPName(title_line[1].strip())                    
 
-        for line in file:
+                # Parsing the EP
+                if len(title_line) == 1 and line != "\n":
+                    line = line.strip()
+                    EP_line = line.split(" - ", maxsplit = 1)
 
-            entry = Entry()
+                    track_entry = Entry()
+                    
+                    track_entry.artist = EP_line[0]
+                    track_entry.song = EP_line[1]
+                    
+                    EP_entry.loadEntry(track_entry)
 
-            # line = "Player: Artist - Song\n" 
-            line = line.strip()
 
-            # temp = ["Player", "Artist - Song"]
-            temp = line.split(": ", maxsplit = 1)
-            entry.player = temp[0]
-
-            # temp2 = ["Artist", "Song"]
-            temp2 = temp[1].split(" - ", maxsplit = 1)
-            entry.artist = temp2[0]
-            entry.song = temp2[1]
-
-            entries_list.append(entry)
+        else:        
+            for line in file:
+                entry = Entry()
+    
+                # line = "Player: Artist - Song\n" 
+                line = line.strip()
+    
+                # temp = ["Player", "Artist - Song"]
+                temp = line.split(": ", maxsplit = 1)
+                entry.player = temp[0]
+    
+                # temp2 = ["Artist", "Song"]
+                temp2 = temp[1].split(" - ", maxsplit = 1)
+                entry.artist = temp2[0]
+                entry.song = temp2[1]
+    
+                entries_list.append(entry)
 
         return entries_list
 
-
+# I think this is kinda redundant, maybe move the functions as methods
 def saveBlankNames(entries_list):
 
     """
     Since both artist and song have to be 'blanked', making a separate
     function is easier than copypasting the same code for each.
     """
+    if IS_EP_ROUND:
+        for EP_entry in entries_list:
+            EP_entry.makeEPNameBlank()
+            
+            for song_entry in EP_entry.entry_list_unguessed:
+                song_entry.blank_artist = createBlankName(song_entry.artist)
+                song_entry.blank_song = createBlankName(song_entry.song)
 
-    for entry in entries_list:
-        entry.blank_artist = createBlankName(entry.artist)
-        entry.blank_song = createBlankName(entry.song)
+    else:
+        for entry in entries_list:
+            entry.blank_artist = createBlankName(entry.artist)
+            entry.blank_song = createBlankName(entry.song)
 
 
 def invalidLetter(entries_list, guess):
@@ -263,19 +298,13 @@ def guessedPlayer(entries_list, player):
 def printBlankList(entries_list):
 
     """
-    Prints it using the folloowing format:
+    Prints using the following format:
 
        Player: Artist - Song
     """
 
     for entry in entries_list:
-        if entry.guessed_player:
-            print(entry.player, end=": ")
-
-        else:
-            print("?:", end=" ")
-
-        print(entry.blank_artist, "-", entry.blank_song)
+        entry.printEntry()
 
 
 def printGuessedLetters(guessed_letters):
@@ -288,14 +317,39 @@ def printGuessedLetters(guessed_letters):
         print(letter.upper(), end=" ")
 
 
+def testing(entries_list):
+    # Testing
+    print(entries_list)
+    for i in entries_list:
+        print("?:", i.blank_EP_name)
+
+        for j in i.entry_list_unguessed:
+            print(j.artist, "-", j.song)
+        
+        print()    
+
+
 def main():
     LIST_NAME = askForName()
+
+    # Put this somewhere else later
+    # also consider making this only once and save all the
+    # guesses and such in a JSON to make it easier to load
+
+    if input("Is this an EP round? (y/n): ") == 'y':
+        global IS_EP_ROUND
+        IS_EP_ROUND = True
+
     entries_list = []
     entries_list = loadSongs(LIST_NAME, entries_list)
+    
     guessed_letters = []
     guessed_words = []
 
     saveBlankNames(entries_list)
+    
+    testing(entries_list)
+    
     loadGuessesFile(LIST_NAME, entries_list, guessed_letters, guessed_words)
     loadGuessedPlayers(LIST_NAME, entries_list)
 
@@ -331,5 +385,5 @@ def main():
 
 
 
-
+# Main program
 main()

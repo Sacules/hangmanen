@@ -9,6 +9,25 @@ def askForName():
     return LIST_NAME
 
 
+def findIndexes(word, letter):
+
+    """
+    Iterates over a word and returns a list with the positions in
+    which a letter apears on it.
+    """
+
+    index = 0
+    index_list = []
+
+    for character in word:
+        if character == letter:
+            index_list.append(index)
+
+        index += 1
+
+    return index_list
+
+
 def createBlankName(name):
 
     """
