@@ -3,6 +3,8 @@ Modified hangman with multiple songs as entries. Originaly designed for
 use on DTForums' roulette games.
 """
 
+from random import shuffle
+
 from generic_functions import *
 from Entry import *
 from EP import *
@@ -37,6 +39,7 @@ def loadSongs(LIST_NAME, entries_list):
                     
                     track_entry.artist = EP_line[0]
                     track_entry.song = EP_line[1]
+                    track_entry.player = EP_entry.player_name
                     
                     EP_entry.loadEntry(track_entry)
 
@@ -92,32 +95,81 @@ def invalidLetter(entries_list, guess):
     hangman = True
     guess_lower = guess.lower()
     guess_upper = guess.upper()
+    
+    if IS_EP_ROUND:
+        for EP_entry in entries_list:
+            for song_entry in EP_entry.entry_list_unguessed:
+                # The letter has to be checked in both the artist and song names, 
+                # in lower and uppercase.
+                if guess_lower in song_entry.artist:
+                    song_entry.blank_artist = replaceLetter(song_entry.artist, guess_lower,
+                                                               song_entry.blank_artist)
+                    hangman = False
+            
+                if guess_lower in song_entry.song:
+                    song_entry.blank_song = replaceLetter(song_entry.song, guess_lower,
+                                                             song_entry.blank_song)
+                    hangman = False
+            
+                if guess_upper in song_entry.artist:
+                    song_entry.blank_artist = replaceLetter(song_entry.artist, guess_upper,
+                                                               song_entry.blank_artist)
+                    hangman = False
+            
+                if guess_upper in song_entry.song:
+                    song_entry.blank_song = replaceLetter(song_entry.song, guess_upper,
+                                                             song_entry.blank_song)
+                    hangman = False
+        
+            if guess_lower in EP_entry.EP_name:
+                EP_entry.blank_EP_name = replaceLetter(EP_entry.EP_name, guess_lower, 
+                                                           EP_entry.blank_EP_name)            
+            
+            if guess_upper in EP_entry.EP_name:
+                EP_entry.blank_EP_name = replaceLetter(EP_entry.EP_name, guess_upper, 
+                                                       EP_entry.blank_EP_name)
 
-    for entry in entries_list:
-
-        # The letter has to be checked in both the artist and song names, 
-        # in lower and uppercase.
-        if guess_lower in entry.artist:
-            entry.blank_artist = entry.replaceLetter(entry.artist, guess_lower,
-                                                     entry.blank_artist)
-            hangman = False
-
-        if guess_lower in entry.song:
-            entry.blank_song = entry.replaceLetter(entry.song, guess_lower,
-                                                   entry.blank_song)
-            hangman = False
-
-        if guess_upper in entry.artist:
-            entry.blank_artist = entry.replaceLetter(entry.artist, guess_upper,
-                                                     entry.blank_artist)
-            hangman = False
-
-        if guess_upper in entry.song:
-            entry.blank_song = entry.replaceLetter(entry.song, guess_upper,
-                                                   entry.blank_song)
-            hangman = False
+    else:
+        for entry in entries_list:
+    
+            # The letter has to be checked in both the artist and song names, 
+            # in lower and uppercase.
+            if guess_lower in entry.artist:
+                entry.blank_artist = replaceLetter(entry.artist, guess_lower,
+                                                         entry.blank_artist)
+                hangman = False
+    
+            if guess_lower in entry.song:
+                entry.blank_song = replaceLetter(entry.song, guess_lower,
+                                                       entry.blank_song)
+                hangman = False
+    
+            if guess_upper in entry.artist:
+                entry.blank_artist = replaceLetter(entry.artist, guess_upper,
+                                                         entry.blank_artist)
+                hangman = False
+    
+            if guess_upper in entry.song:
+                entry.blank_song = replaceLetter(entry.song, guess_upper,
+                                                       entry.blank_song)
+                hangman = False
 
     return hangman
+
+
+def findWord(entry, guess):
+    # Looks into the artist
+    index = entry.artist.find(guess)
+
+    if index != -1:
+        return True
+
+    # Looks into the song
+    else:
+        index = entry.song.find(guess)
+
+        if index != -1:
+            return True
 
 
 def invalidWords(entries_list, guess):
@@ -127,30 +179,46 @@ def invalidWords(entries_list, guess):
     the entries. No spellchecking, this is case-sensitive. Enter either
     artist or song name (or part of either) here, but not both.
     """
+    
+    invalid = False
+    
+    if IS_EP_ROUND:
+        for EP_entry in entries_list:
+            for entry in EP_entry.entry_list_unguessed:
+                invalid = invalid or findWord(entry, guess)
 
-    invalid = True
+    else:
+        for entry in entries_list:
+            invalid = invalid or findWord(entry, guess)
+    
+    return not invalid
 
-    for entry in entries_list:
 
-        # Looks into the artist
-        index = entry.artist.find(guess)
-
-        if index != -1:
-            entry.blank_artist = entry.replaceWords(entry.blank_artist,
-                                                    guess, index)
-
-            invalid = False
-
-        # Looks into the song
-        else:
-            index = entry.song.find(guess)
-
+def fillCorrectWords(entries_list, guess):
+    if IS_EP_ROUND:
+        for EP_entry in entries_list:
+            for song_entry in EP_entry.entry_list_unguessed:
+                # Looks into the artist
+                index = song_entry.artist.find(guess)
+                if index != -1:
+                    song_entry.replaceBlankArtist(guess, index)
+            
+                # Looks into the song
+                index = song_entry.song.find(guess)
+                if index != -1:
+                    song_entry.replaceBlankSong(guess, index)                
+    
+    else:
+        for entry in entries_list:
+            # Looks into the artist
+            index = entry.artist.find(guess)
             if index != -1:
-                entry.blank_song = entry.replaceWords(entry.blank_song,
-                                                      guess, index)
-                invalid = False
-
-    return invalid
+                entry.replaceBlankArtist(guess, index)
+    
+            # Looks into the song
+            index = entry.song.find(guess)
+            if index != -1:
+                entry.replaceBlankSong(guess, index)
 
 
 def checkGuess(entries_list, guess, guessed_letters, guessed_words):
@@ -164,23 +232,14 @@ def checkGuess(entries_list, guess, guessed_letters, guessed_words):
         print("\nGuess is already existing. Try another one.")
         guess = input("New guess: ")
 
-    else:
-        if isLetter(guess):
-            if invalidLetter(entries_list, guess):
-                print("ohnoes, a hangman!")
+    if isLetter(guess) and not invalidLetter(entries_list, guess):
+        guessed_letters.append(guess)
 
-            else:
-                guessed_letters.append(guess)
+    elif not invalidWords(entries_list, guess):
+        fillCorrectWords(entries_list, guess)
+        guessed_words.append(guess)
 
-        else:
-            if invalidWords(entries_list, guess):
-                print(guess)
-                print("hangman D:")
-
-            else:
-                guessed_words.append(guess)
-
-        return (guessed_letters, guessed_words)
+    return (guessed_letters, guessed_words)
 
 
 def loadGuessesFile(LIST_NAME, entries_list, guessed_letters, guessed_words):
@@ -213,15 +272,18 @@ def checkComplete(entries_list):
 
     """If all entries have been guessed, game is over."""
 
-    for entry in entries_list:
-        if (entry.artist != entry.blank_artist 
-            or entry.song != entry.blank_song):
+    all_guessed = False
 
-            if not entry.guessed_player:
-                return False
+    if IS_EP_ROUND:
+        pass
 
     else:
-        return True
+        for entry in entries_list:
+            if (entry.artist != entry.blank_artist 
+                or entry.song != entry.blank_song):
+                    all_guessed = all_guessed and entry.guessed_player
+    
+    return all_guessed
 
 
 def promptUser():
@@ -287,24 +349,46 @@ def guessedPlayer(entries_list, player):
        Looks for the the player and makes it printable once it's 
        been guessed.
     """
+    
+    if IS_EP_ROUND:
+        for EP_entry in entries_list:
+            for song_entry in EP_entry.entry_list_unguessed:
+                if song_entry.player == player:
+                    song_entry.guessed_player = True
 
-    for entry in entries_list:
-        if entry.player == player:
-            entry.guessed_player = True
+    else:
+        for entry in entries_list:
+            if entry.player == player:
+                entry.guessed_player = True
 
-    return entry.guessed_player
+    return True
 
 
-def printBlankList(entries_list):
+def printBlankList(entries_list, random_songs_list):
 
     """
     Prints using the following format:
 
        Player: Artist - Song
     """
+    if IS_EP_ROUND:
+        print("EP titles:")
+        for EP_entry in entries_list:
+            EP_entry.printGuessedEP()
+        
+        print("\nEP songs:")
+        for EP_entry in entries_list:
+            for entry in EP_entry.entry_list_unguessed:
+                random_songs_list.append(entry)
+        
+        shuffle(random_songs_list)
+        
+        for entry in random_songs_list:
+            entry.printEntry()
 
-    for entry in entries_list:
-        entry.printEntry()
+    else:
+        for entry in entries_list:
+            entry.printEntry()
 
 
 def printGuessedLetters(guessed_letters):
@@ -319,14 +403,15 @@ def printGuessedLetters(guessed_letters):
 
 def testing(entries_list):
     # Testing
-    print(entries_list)
-    for i in entries_list:
-        print("?:", i.blank_EP_name)
-
-        for j in i.entry_list_unguessed:
-            print(j.artist, "-", j.song)
-        
-        print()    
+    if IS_EP_ROUND:
+        print(entries_list)
+        for i in entries_list:
+            print("?:", i.blank_EP_name)
+    
+            for j in i.entry_list_unguessed:
+                print(j.artist, "-", j.song)
+            
+            print()    
 
 
 def main():
@@ -352,8 +437,9 @@ def main():
     
     loadGuessesFile(LIST_NAME, entries_list, guessed_letters, guessed_words)
     loadGuessedPlayers(LIST_NAME, entries_list)
-
-    printBlankList(entries_list)
+    
+    random_songs_list = []
+    printBlankList(entries_list, random_songs_list)
     printGuessedLetters(guessed_letters)
 
     while not checkComplete(entries_list):

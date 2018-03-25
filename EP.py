@@ -31,7 +31,7 @@ class EP():
     def guessedEntry(self, entry):
         self.entry_list_guessed.append(entry)
         self.entry_list_unguessed.remove(entry)
-
+    
     def printGuessedEP(self):
         # Title
         if self.guessed_player:
