@@ -9,6 +9,16 @@ To use it, place a text file in the same folder as script, and put the entries f
 ```
 Player: Artist - Song
 ```
+First, clone it into a folder you like
+```
+git clone https://github.com/Sacules/hangmanen.git
+```
+or download it as a ZIP file. Afterwards, open a terminal in the folder that was created and run the script with
+```
+python3 hangmanen.py
+```
+If you're using Linux, it's likely your distro already comes with Python 3.x installed. On Windows and OSX, you can download it from [here](https://www.python.org/downloads/) - make sure you choose the option "Add to PATH" when installing!
+
 ## Example
 Let's look at one of the rounds I hosted - I made a file called _round 4.txt_, opened it, and saved the following:
 
