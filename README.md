@@ -17,7 +17,7 @@ or download it as a ZIP file. Afterwards, open a terminal in the folder that was
 ```
 python3 hangmanen.py
 ```
-If you're using Linux, it's likely your distro already comes with Python 3.x installed. On Windows and OSX, you can download it from [here](https://www.python.org/downloads/) - make sure you choose the option "Add to PATH" when installing!
+If you're using Linux, it's likely your distro already comes with Python 3.x and git installed. On Windows and OSX, you can download Python from [here](https://www.python.org/downloads/) (make sure you choose the option "Add to PATH" when installing!) and git from [here](https://git-scm.com/downloads).
 
 ## Example
 Let's look at one of the rounds I hosted - I made a file called _round 4.txt_, opened it, and saved the following:
