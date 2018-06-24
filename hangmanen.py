@@ -4,6 +4,7 @@ use on DTForums' roulette games.
 """
 from Entry import *
 
+SPECIAL_CHARS = " -(),.:;?!'&"
 
 def askForName():
 
@@ -21,9 +22,7 @@ def loadSongs(LIST_NAME, entries_list):
     """Loads the list of names from a text file, one per line."""
 
     with open(LIST_NAME + ".txt", "r", encoding='utf-8') as file:
-
         for line in file:
-
             entry = Entry()
 
             # line = "Player: Artist - Song\n" 
@@ -51,17 +50,16 @@ def createBlankName(name):
     """
 
     new_name = ""
-    special_chars = " -(),.:;?!'&"
     
     for letter in name:
-        index = special_chars.find(letter)
+        index = SPECIAL_CHARS.find(letter)
         
         # The letter is no special character
         if index == -1:
             new_name = new_name + "_"
         
         else:
-            new_name = new_name + special_chars[index]
+            new_name = new_name + SPECIAL_CHARS[index]
 
     return new_name
 
@@ -193,24 +191,25 @@ def loadGuessesFile(LIST_NAME, entries_list, guessed_letters, guessed_words):
     """LIST_NAME must not end in '.txt'."""
     
     try:
-        with open(LIST_NAME + ' guesses.txt', 'r', encoding='utf-8') as file:
-            for line in file:
-                line = line.strip()
-                
-                if "\ufeff" in line:
-                    line = line.replace("\ufeff", "")
-                
-                guessed_entries = checkGuess(entries_list, line, 
-                                             guessed_letters, guessed_words)
-                
-                guessed_letters = guessed_entries[0]
-                guessed_words = guessed_entries[1]
+        file = open(LIST_NAME + ' guesses.txt', 'r', encoding='utf-8')
 
     except FileNotFoundError:
         file = open(LIST_NAME + ' guesses.txt', 'w', encoding='utf-8')
-        file.close()
-    
+
     finally:
+        for line in file:
+            line = line.strip()
+            
+            if "\ufeff" in line:
+                line = line.replace("\ufeff", "")
+            
+            guessed_entries = checkGuess(entries_list, line, 
+                                         guessed_letters, guessed_words)
+            
+            guessed_letters = guessed_entries[0]
+            guessed_words = guessed_entries[1]
+
+        file.close()
         return guessed_letters
 
 
@@ -311,7 +310,8 @@ def guessedPlayer(entries_list, player):
 
 def printBlankList(entries_list):
 
-    """Prints it using the folloowing format:
+    """
+       Prints it using the folloowing format:
        
        Player: Artist - Song
     """
@@ -370,7 +370,6 @@ def main():
         
         elif choice == "3":
             break
-        
 
         printBlankList(entries_list)
         printGuessedLetters(guessed_letters)        
