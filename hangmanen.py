@@ -215,8 +215,6 @@ def loadGuessesFile(LIST_NAME, entries_list, guessed_letters, guessed_words):
 
 def askGuess():
     
-    """Water is wet."""
-    
     guess = input("Enter a word or letter to guess: ")
     
     return guess
