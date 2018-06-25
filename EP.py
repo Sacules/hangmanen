@@ -2,30 +2,42 @@ from text_functions import *
 
 class EP():
 
-    def __init__(self):
+    def __init__(self, name, player):
 
         """Basic info each EP holds."""
 
-        self.name = ""
-        self.blank_name = ""
+        self.name = name
+        self.blank_name = createBlankName(self.name)
 
-        self.player = ""
+        self.player = player
         self.guessed_player = False
 
-    def replaceEPNameLetter(self):
-        pass
+        self.entries = []
 
-    def replaceEPNameWords(self):
-        pass
+    def addEntry(self, entry):
+        self.entries.append(entry)
 
-    def createEPNameBlank(self):
-        pass
+    def replaceEPNameLetter(self, letter):
+        if letter in self.name:
+            self.blank_name = replaceLetter(self.name, self.blank_name, letter)
+
+        else:
+            print("Invalid guess!")
+
+    def replaceEPNameWords(self, word):
+        if word in self.name:
+            self.blank_name = replaceWord(self.name, self.blank_name, word)
+
+        else:
+            print("Invalid guess!")
 
     def printEP(self):
         pass
 
-    def replaceEPEntryLetter(self):
-        pass
+    def replaceEPEntryLetter(self, letter):
+        for entry in self.entries:
+            entry.replaceEntryLetter(letter)
 
-    def replaceEPEntryWords(self):
-        pass
+    def replaceEPEntryWord(self, word):
+        for entry in self.entries:
+            entry.replaceEntryWord(word)

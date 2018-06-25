@@ -2,24 +2,29 @@ from text_functions import *
 
 class Entry():
 
-    def __init__(self):
+    def __init__(self, name, player):
 
         """Basic info each entry holds."""
 
-        self.name = ""
-        self.blank_name = ""
+        self.name = name
+        self.blank_name = createBlankName(self.name)
 
-        self.player = ""
+        self.player = player
         self.guessed_player = False
 
-    def replaceEntryLetter(self):
-        pass
+    def replaceEntryLetter(self, letter):
+        if letter in self.name:
+            self.blank_name = replaceLetter(self.name, self.blank_name, letter)
 
-    def replaceEntryWords(self):
-        pass
+        else:
+            print("Invalid guess!")
 
-    def createEntryBlank(self):
-        pass
+    def replaceEntryWord(self, word):
+        if word in self.name:
+            self.blank_name = replaceWord(self.name, self.blank_name, word)
+
+        else:
+            print("Invalid guess!")
 
     def printEntry(self):
         pass

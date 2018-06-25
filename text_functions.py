@@ -20,14 +20,14 @@ def findIndexes(word, letter):
     return index_list
 
 
-def replaceLetter(name, letter, replacing_name):
+def replaceLetter(ref_name, replacing_name, letter):
 
     """
     When a guessed letter is valid, all instances of it have
     to be replaced.
     """
 
-    index_list = findIndexes(name, letter)
+    index_list = findIndexes(ref_name, letter)
 
     # Since strings are immutable, we need to transform it into a list
     replacing_name = list(replacing_name)
@@ -40,19 +40,23 @@ def replaceLetter(name, letter, replacing_name):
     return "".join(replacing_name)
 
 
-def replaceWords(replacing_name, guess, index):
+def replaceWord(ref_name, replacing_name, word):
 
     """
-    Assume this won't go out of index range. Please.
+    Replaces an instance of a word, or prompts for more if found.
     """
 
+    index = ref_name.find(word)
+
+    # Since strings are immutable, we need to transform these into lists
     replacing_name = list(replacing_name)
-    guess = list(guess)
+    word = list(word)
 
-    for character in guess:
+    for character in word:
         replacing_name[index] = character
         index += 1
 
+    # We put it as a string back again
     return "".join(replacing_name)
 
 
