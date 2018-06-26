@@ -1,7 +1,6 @@
 from text_functions import *
 
 class EP():
-
     def __init__(self, name, player):
 
         """Basic info each EP holds."""
@@ -32,7 +31,15 @@ class EP():
             print("Invalid guess!")
 
     def printEP(self):
-        pass
+        if self.guessed_player:
+            print(self.player + ":", self.blank_name)
+
+            for entry in self.entries:
+                if entry.guessed_player:
+                    print(entry.blank_name)
+
+        else:
+            print("?:", self.blank_name)
 
     def replaceEPEntryLetter(self, letter):
         for entry in self.entries:
