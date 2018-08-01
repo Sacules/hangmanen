@@ -16,11 +16,10 @@ def askListName():
     print("Name of the text file to load (without the extension): ", end="")
     LIST_NAME = input()
 
+
 def loadSongs(entries_list):
 
     """Reads the entries from a text file, one per line."""
-
-    entries_list = []
 
     while True:
         try:
@@ -32,6 +31,8 @@ def loadSongs(entries_list):
 
         else:
             break
+
+    entries_list = []
 
     for line in file:
         # line = "Player: Artist - Song\n"
@@ -261,7 +262,7 @@ def printGuessedLetters(guessed_letters):
 
 def main():
     askListName()
-    entries_list = loadSongs(entries_list)
+    entries_list = loadSongs()
 
     guessed_letters = []
     guessed_words = []
