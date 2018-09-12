@@ -1,6 +1,8 @@
+# ----- Constants ----- #
 SPECIAL_CHARS = " -(),.:;?!'&"
 
 
+# ----- Functions ----- #
 def findIndexes(word, letter):
 
     """

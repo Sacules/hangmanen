@@ -3,21 +3,22 @@ Modified hangman with multiple songs as entries. Originaly designed for
 use on DTForums' roulette games.
 """
 
-#----- Modules -----#
-from Entry import *
+# ----- Modules ----- #
+import Entry
 
 
-#----- Constants -----#
+# ----- Constants ----- #
 LIST_NAME = ""
 
 
-#----- Functions -----#
+# ----- Functions ----- #
 def askListName():
     print("Name of the text file to load (without the extension): ", end="")
+    global LIST_NAME
     LIST_NAME = input()
 
 
-def loadSongs(entries_list):
+def loadSongs():
 
     """Reads the entries from a text file, one per line."""
 
@@ -39,7 +40,7 @@ def loadSongs(entries_list):
         line = line.strip()
 
         # line = ["Player", "Artist - Song"]
-        line = line.split(": ", maxsplit = 1)
+        line = line.split(": ", maxsplit=1)
         entry = Entry(line[1], line[0])
 
         entries_list.append(entry)
@@ -47,51 +48,37 @@ def loadSongs(entries_list):
     return entries_list
 
 
-def isLetter(words):
+def validLetter(entries_list, guess):
 
-    """
-    This looks nicer and more understandable instead of just
-    using a '==' comparison.
-    """
+    """ Checks if the letter exists on any of the entries. """
 
-    return len(words) == 1
-
-
-def invalidLetter(entries_list, guess):
-
-    """
-    Tries replacing the letter in the entries, and warns if doesn't exist.
-    """
-
-    invalid = True
-    guess_lower = guess.lower() # The letter has to be checked in both
-    guess_upper = guess.upper() # lowercase and uppercase
+    guess_lower = guess.lower()
+    guess_upper = guess.upper()
 
     for entry in entries_list:
-        if (entry.replaceEntryLetter(guess_lower)
-            or entry.replaceEntryLetter(guess_upper)):
-            invalid = False
+        # The letter has to be checked in both
+        # lowercase and uppercase
+        if guess_lower in entry.name or guess_upper in entry.name:
+            return True
 
-    return invalid
+    return False
 
 
-def invalidWords(entries_list, guess):
+def validWord(entries_list, guess):
 
     """
     This assumes you're writing the words exactly as they written in
     the entries. No spellchecking, this is case-sensitive.
     """
 
-    invalid = True
-
     for entry in entries_list:
-        if entry.replaceEntryWord(guess):
-            invalid = False
+        if guess in entry.name:
+            return True
 
-    return invalid
+    return False
 
 
-def checkGuess(entries_list, guess, guessed_letters, guessed_words):
+def checkGoodGuess(entries_list, guess, guessed_letters, guessed_words):
 
     """
     It is important to separate what kind of guess the player is
@@ -102,16 +89,26 @@ def checkGuess(entries_list, guess, guessed_letters, guessed_words):
         print("\nGuess is already existing. Try another one.")
         guess = input("New guess: ")
 
-    if isLetter(guess) and not invalidLetter(entries_list, guess):
-        guessed_letters.append(guess)
+    if len(guess) == 1:
+        return validLetter(entries_list, guess)
 
-    elif not isLetter(guess) and not invalidWords(entries_list, guess):
-        guessed_words.append(guess)
+    if len(guess) > 1:
+        return validWord(entries_list, guess)
 
-    else:
-        print("Invalid guess!")
 
-    return (guessed_letters, guessed_words)
+def saveGoodGuess(entries_list, guess, guessed_letters, guessed_words):
+    if checkGoodGuess(entries_list, guess, guessed_letters, guessed_words):
+        for entry in entries_list:
+            if len(guess) == 1:
+                entry.replaceLetter(guess.lower())
+                entry.replaceLetter(guess.upper())
+                guessed_letters.append(guess)
+
+            if len(guess) > 1:
+                entry.replaceWord(guess)
+                guessed_words.append(guess)
+
+    return(guessed_letters, guessed_words)
 
 
 def loadGuessesFile(entries_list, guessed_letters, guessed_words):
@@ -131,7 +128,7 @@ def loadGuessesFile(entries_list, guessed_letters, guessed_words):
             if "\ufeff" in line:
                 line = line.replace("\ufeff", "")
 
-            guessed_letters, guessed_words = checkGuess(entries_list,
+            guessed_letters, guessed_words = checkGoodGuess(entries_list,
                                                         line,
                                                         guessed_letters,
                                                         guessed_words)
@@ -279,7 +276,7 @@ def main():
 
         if choice == "1":
             guess = askGuess()
-            guessed_entries = checkGuess(entries_list, guess,
+            guessed_entries = checkGoodGuess(entries_list, guess,
                                          guessed_letters, guessed_words)
             guessed_letters = guessed_entries[0]
             guessed_words = guessed_entries[1]
